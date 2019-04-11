@@ -6,7 +6,6 @@ using UnityEngine.UI;
 public class Player : MonoBehaviour
 {
     [SerializeField] private Image _reticle = null;
-    public float test = 0.5f;
     private PlayerInventory _inventory;
     private Camera _camera;
     private int _layermask;

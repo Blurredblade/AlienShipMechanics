@@ -16,9 +16,11 @@ public class SurgicalLaser : MonoBehaviour
     private ParticleSystem laserSparks;
     private bool LaserOn;
     private bool canToggle;
+    private int reflectCount;
     
     void Start()
     {
+        reflectCount = 0;
         baseRotY = transform.rotation.eulerAngles.y;
         LowerRot = UpperRot = 0;
         laser = transform.GetChild(1).GetChild(1).GetChild(1).GetChild(1).GetComponent<LineRenderer>();
@@ -37,15 +39,21 @@ public class SurgicalLaser : MonoBehaviour
         RaycastHit laserHit;
         if(LaserOn){
             laserDot.intensity = 30;
+            Vector3 dir = laser.transform.TransformDirection(Vector3.forward);
             
-            if(Physics.Raycast(laser.transform.position, laser.transform.TransformDirection(Vector3.forward), out laserHit, Mathf.Infinity)){
+            if(Physics.Raycast(laser.transform.position, dir, out laserHit, Mathf.Infinity)){
                 float dist = Vector3.Distance(laser.transform.position, laserHit.point);
-                laser.SetPosition(1, new Vector3(0,0,dist + 0.2f));
-                laserDot.transform.position = laserHit.point + (laserHit.normal * 0.005f);
-                laserSparks.transform.position = laserHit.point + (laserHit.normal * 0.02f);
-                laserSparks.transform.rotation = Quaternion.FromToRotation(Vector3.up, laserHit.normal);
+                laser.SetPosition(1, new Vector3(0,0,dist));
+                
                 if(laserHit.collider.gameObject.tag == "doorpanel"){
                     laserHit.collider.gameObject.GetComponent<DoorControlPanel>().SetHit(true);
+                }else if(laserHit.collider.gameObject.layer == 11){
+                    Reflect(laserHit, dir, 1);
+                }else{
+                    laser.positionCount = 2;
+                    laserDot.transform.position = laserHit.point + (laserHit.normal * 0.005f);
+                    laserSparks.transform.position = laserHit.point + (laserHit.normal * 0.02f);
+                    laserSparks.transform.rotation = Quaternion.FromToRotation(Vector3.up, laserHit.normal);
                 }
             }
             
@@ -53,6 +61,26 @@ public class SurgicalLaser : MonoBehaviour
             laser.SetPosition(1, new Vector3(0,0,0));
             laserDot.intensity = 0;
             
+        }
+    }
+    
+    void Reflect(RaycastHit laserHit, Vector3 dir, int num){
+        laser.positionCount = num + 2;
+        RaycastHit reflectHit;
+        Vector3 direction = Vector3.Reflect(dir, laserHit.normal);
+        
+        if(Physics.Raycast(laserHit.point, direction, out reflectHit, Mathf.Infinity)){
+            laser.SetPosition(laser.positionCount - 1, laser.transform.InverseTransformPoint(reflectHit.point));
+            if(reflectHit.collider.gameObject.layer == 11){
+                Reflect(reflectHit, direction, num + 1);
+            
+            }else if(reflectHit.collider.gameObject.tag == "doorpanel"){
+                    reflectHit.collider.gameObject.GetComponent<DoorControlPanel>().SetHit(true);
+            }else{
+                laserDot.transform.position = reflectHit.point + (reflectHit.normal * 0.005f);
+                laserSparks.transform.position = reflectHit.point + (reflectHit.normal * 0.02f);
+                laserSparks.transform.rotation = Quaternion.FromToRotation(Vector3.up, reflectHit.normal);
+            }
         }
     }
 
