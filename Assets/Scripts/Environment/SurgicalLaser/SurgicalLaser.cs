@@ -58,6 +58,10 @@ public class SurgicalLaser : MonoBehaviour
                 {
                     Reflect(laserHit, dir, 1);
                 }
+                else if (laserHit.collider.gameObject.GetComponent<LaserReflector>())
+                {
+                    laserHit.collider.gameObject.GetComponent<LaserReflector>().CalcLaser(laserSparks, laserDot);
+                }
                 else
                 {
                     laser.positionCount = 2;
@@ -94,6 +98,10 @@ public class SurgicalLaser : MonoBehaviour
             else if (reflectHit.collider.gameObject.tag == "doorpanel")
             {
                 reflectHit.collider.gameObject.GetComponent<DoorControlPanel>().SetHit(true);
+            }
+            else if (reflectHit.collider.gameObject.GetComponent<LaserReflector>())
+            {
+                reflectHit.collider.gameObject.GetComponent<LaserReflector>().CalcLaser(laserSparks, laserDot);
             }
             else
             {
