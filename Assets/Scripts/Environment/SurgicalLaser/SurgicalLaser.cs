@@ -58,9 +58,13 @@ public class SurgicalLaser : MonoBehaviour
                 {
                     Reflect(laserHit, dir, 1);
                 }
-                else if (laserHit.collider.gameObject.GetComponent<LaserReflector>())
+                else if (laserHit.collider.tag == "emitter")
                 {
-                    laserHit.collider.gameObject.GetComponent<LaserReflector>().CalcLaser(laserSparks, laserDot);
+                    if (laserHit.collider.gameObject.GetComponent<LaserReflector>())
+                    {
+                        laserHit.collider.gameObject.GetComponent<LaserReflector>().CalcLaser(laserSparks, laserDot);
+                    }
+
                 }
                 else
                 {
